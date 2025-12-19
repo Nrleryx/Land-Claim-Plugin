@@ -22,53 +22,59 @@ public class ClaimManager {
 
     public void loadClaims() {
         claims.clear();
-        File claimsFile = new File(plugin.getDataFolder(), "claims.yml");
-        if (!claimsFile.exists()) {
+        File file = new File(plugin.getDataFolder(), "claims.yml");
+        if (!file.exists()) {
             try {
-                claimsFile.createNewFile();
+                file.createNewFile();
             } catch (IOException e) {
                 plugin.getLogger().severe("Could not create claims.yml!");
             }
             return;
         }
 
-        FileConfiguration config = YamlConfiguration.loadConfiguration(claimsFile);
-        if (config.contains("claims")) {
-            for (String key : config.getConfigurationSection("claims").getKeys(false)) {
-                String path = "claims." + key;
-                UUID owner = UUID.fromString(config.getString(path + ".owner"));
-                String world = config.getString(path + ".world");
-                int minX = config.getInt(path + ".minX");
-                int minZ = config.getInt(path + ".minZ");
-                int maxX = config.getInt(path + ".maxX");
-                int maxZ = config.getInt(path + ".maxZ");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+        if (!config.contains("claims")) {
+            return;
+        }
+        
+        org.bukkit.configuration.ConfigurationSection section = config.getConfigurationSection("claims");
+        if (section == null) {
+            return;
+        }
+        
+        for (String key : section.getKeys(false)) {
+            String path = "claims." + key;
+            UUID owner = UUID.fromString(config.getString(path + ".owner"));
+            String world = config.getString(path + ".world");
+            int minX = config.getInt(path + ".minX");
+            int minZ = config.getInt(path + ".minZ");
+            int maxX = config.getInt(path + ".maxX");
+            int maxZ = config.getInt(path + ".maxZ");
 
-                Claim claim = new Claim(owner, world, minX, minZ, maxX, maxZ);
-                claims.put(key, claim);
-            }
+            Claim claim = new Claim(owner, world, minX, minZ, maxX, maxZ);
+            claims.put(key, claim);
         }
     }
 
     public void saveClaims() {
-        File claimsFile = new File(plugin.getDataFolder(), "claims.yml");
-        FileConfiguration config = YamlConfiguration.loadConfiguration(claimsFile);
+        File file = new File(plugin.getDataFolder(), "claims.yml");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
         
         config.set("claims", null);
-        int index = 0;
-        for (Map.Entry<String, Claim> entry : claims.entrySet()) {
-            String path = "claims." + index;
-            Claim claim = entry.getValue();
+        int i = 0;
+        for (Claim claim : claims.values()) {
+            String path = "claims." + i;
             config.set(path + ".owner", claim.getOwner().toString());
             config.set(path + ".world", claim.getWorld());
             config.set(path + ".minX", claim.getMinX());
             config.set(path + ".minZ", claim.getMinZ());
             config.set(path + ".maxX", claim.getMaxX());
             config.set(path + ".maxZ", claim.getMaxZ());
-            index++;
+            i++;
         }
 
         try {
-            config.save(claimsFile);
+            config.save(file);
         } catch (IOException e) {
             plugin.getLogger().severe("Could not save claims.yml!");
         }
@@ -82,18 +88,15 @@ public class ClaimManager {
         String world = loc1.getWorld().getName();
 
         for (Claim claim : claims.values()) {
-            if (!claim.getWorld().equals(world)) {
-                continue;
-            }
-            
+            if (!claim.getWorld().equals(world)) continue;
             if (claim.overlaps(minX, minZ, maxX, maxZ)) {
                 return false;
             }
         }
 
-        int maxClaims = plugin.getConfigManager().getMaxClaims();
-        int playerClaims = getPlayerClaimCount(player);
-        return playerClaims < maxClaims;
+        int max = plugin.getConfigManager().getMaxClaims();
+        int count = getPlayerClaimCount(player);
+        return count < max;
     }
 
     public boolean createClaim(Location loc1, Location loc2, UUID player) {
@@ -107,19 +110,16 @@ public class ClaimManager {
         int maxZ = Math.max(loc1.getBlockZ(), loc2.getBlockZ());
         String world = loc1.getWorld().getName();
 
-        String claimId = UUID.randomUUID().toString();
+        String id = UUID.randomUUID().toString();
         Claim claim = new Claim(player, world, minX, minZ, maxX, maxZ);
-        claims.put(claimId, claim);
+        claims.put(id, claim);
         saveClaims();
         return true;
     }
 
     public boolean removeClaim(Location location, UUID player) {
         Claim claim = getClaimAt(location);
-        if (claim == null) {
-            return false;
-        }
-        if (!claim.getOwner().equals(player)) {
+        if (claim == null || !claim.getOwner().equals(player)) {
             return false;
         }
 
@@ -147,9 +147,7 @@ public class ClaimManager {
 
     public boolean canBuild(Location location, UUID player) {
         Claim claim = getClaimAt(location);
-        if (claim == null) {
-            return true;
-        }
+        if (claim == null) return true;
         return claim.getOwner().equals(player);
     }
 
@@ -164,13 +162,13 @@ public class ClaimManager {
     }
 
     public List<Claim> getPlayerClaims(UUID player) {
-        List<Claim> playerClaims = new ArrayList<>();
+        List<Claim> list = new ArrayList<>();
         for (Claim claim : claims.values()) {
             if (claim.getOwner().equals(player)) {
-                playerClaims.add(claim);
+                list.add(claim);
             }
         }
-        return playerClaims;
+        return list;
     }
 }
 

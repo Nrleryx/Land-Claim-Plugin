@@ -16,7 +16,6 @@ public class LandClaimPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        
         configManager = new ConfigManager(this);
         claimManager = new ClaimManager(this);
         
@@ -30,7 +29,6 @@ public class LandClaimPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ClaimListener(this), this);
         
         getLogger().info("LandClaim plugin has been enabled!");
-        getLogger().info("Players can now claim and protect their land!");
     }
 
     @Override
