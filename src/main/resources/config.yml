@@ -1,0 +1,24 @@
+# LandClaim Configuration
+
+# Maximum number of claims per player
+max-claims: 3
+
+# Minimum claim size (blocks)
+min-claim-size: 10
+
+# Maximum claim size (blocks)
+max-claim-size: 1000
+
+# Protection settings
+protect-build: true
+protect-break: true
+protect-interact: true
+
+# Messages
+messages:
+  claim-success: "&aLand successfully claimed!"
+  unclaim-success: "&aLand unclaimed successfully!"
+  no-permission: "&cYou don't have permission to interact in this area!"
+  already-claimed: "&cThis area is already claimed!"
+  max-claims: "&cYou have reached the maximum number of claims!"
+

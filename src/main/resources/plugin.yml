@@ -1,0 +1,42 @@
+name: LandClaim
+version: '${project.version}'
+main: com.landclaim.LandClaimPlugin
+api-version: 1.20
+author: YourName
+description: Advanced Land Protection & Claim System
+website: https://example.com
+
+commands:
+  claim:
+    description: Claim land to protect it
+    aliases: [c]
+    usage: /<command>
+    permission: landclaim.claim
+  unclaim:
+    description: Remove your claim
+    aliases: [uc]
+    usage: /<command>
+    permission: landclaim.unclaim
+  landclaim:
+    description: Main LandClaim command
+    aliases: [lc]
+    usage: /<command> [subcommand]
+
+permissions:
+  landclaim.*:
+    description: All LandClaim permissions
+    default: op
+    children:
+      landclaim.claim: true
+      landclaim.unclaim: true
+      landclaim.admin: true
+  landclaim.claim:
+    description: Claim land
+    default: true
+  landclaim.unclaim:
+    description: Unclaim land
+    default: true
+  landclaim.admin:
+    description: Admin commands
+    default: op
+
